@@ -1,8 +1,9 @@
 'use client';
-
+import { useRouter } from 'next/navigation';
 import { use,useEffect, useState  } from 'react';
 import Link from 'next/link';
 import { bakers, products } from '@/data/bakersData';
+import { useSession } from 'next-auth/react';
 
 interface Baker {
   id: string;
@@ -12,6 +13,7 @@ interface Baker {
   businessAddress?: string;
   bio?: string;
   phone?: string;
+  paymentLink?:string;
   specialties: string[];
   photos: string[];
   user: {
@@ -25,8 +27,10 @@ interface Baker {
 }
 export default function BakerProfile({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+   const { data: session } = useSession();
   const [bakers, setBakers] = useState<Baker[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const baker = bakers.find(b => b.id === id);
   const bakerProducts = products.filter(p => p.bakerId === id);
   useEffect(() => {
@@ -42,6 +46,41 @@ export default function BakerProfile({ params }: { params: Promise<{ id: string 
       console.error('Error fetching bakers:', error);
     } finally {
       setLoading(false);
+    }
+  };
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!session) {
+      alert('Please sign in to place an order');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bakerId: id,
+          pastryType: 'Croissant',
+          quantity: 1,
+          totalAmount: 1,
+        }),
+      });
+
+      if (response.ok) {
+        alert('Order placed successfully!');
+        // setShowOrderModal(false);
+        router.push(`https://paystack.com/buy/croissants-hlhwoc`);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to place order');
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert('Failed to place order');
     }
   };
   if (!baker) {
@@ -112,15 +151,16 @@ export default function BakerProfile({ params }: { params: Promise<{ id: string 
 
                   {/* Contact Buttons */}
                   <div className="flex gap-3">
-                    <a
-                      href={`https://paystack.com/buy/croissants-hlhwoc`}
+                    <button
+                    onClick={(e)=>handleOrderSubmit(e)}
+                      // href={`https://paystack.com/buy/croissants-hlhwoc`}
                       className="bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors flex items-center gap-2"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                       Order Now
-                    </a>
+                    </button>
                     <a
                       href={`mailto:${baker.user.email}`}
                       className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center gap-2"

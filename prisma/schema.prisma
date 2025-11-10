@@ -37,6 +37,7 @@ model Profile {
   firstName       String
   lastName        String
   bio             String?
+  paymentLink            String?
   phone           String?
   photos          String[]
   education       Education[]

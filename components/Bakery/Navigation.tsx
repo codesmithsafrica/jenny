@@ -50,9 +50,13 @@ export default function Navigation() {
 
           {/* CTA Button */}
           <div className="flex items-center gap-4">
-            <button className="hidden md:block bg-amber-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-amber-700 transition-colors">
-              Become a Baker
-            </button>
+  
+            <Link
+              href="/auth/signup"
+              className="hidden md:block bg-amber-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+            >
+                Become a Baker
+            </Link>
             
             {/* Mobile Menu Button */}
             <button className="md:hidden text-gray-600">

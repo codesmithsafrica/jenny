@@ -18,19 +18,19 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
 
     
-    const where = {
+    const where:any = {
       user: {
         role: 'BAKER',
       },
     };
 
     if (status && ['PENDING', 'APPROVED', 'REJECTED'].includes(status)) {
-      //@ts-expect-error:fix
+    
       where.bakerStatus = status;
     }
 
     const bakers = await prisma.profile.findMany({
-       //@ts-expect-error:fix
+    
       where,
       include: {
         user: {

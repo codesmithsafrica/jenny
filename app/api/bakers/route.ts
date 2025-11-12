@@ -16,7 +16,6 @@ export async function GET(request: Request) {
         firstName: true,
         lastName: true,
         bio: true,
-        //@ts-expect-error:fix
         paymentLink: true,
         phone: true,
         photos: true,
